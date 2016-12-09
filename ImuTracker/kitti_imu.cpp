@@ -15,7 +15,7 @@
 #include "lib-eigen/Eigen/Geometry"
 #include "imu_tracker.h"
 
-# define M_PI           3.14159265358979323846  /* pi */
+//# define M_PI           3.14159265358979323846  /* pi */
 # define M_G            9.80665                 /* g  */
 //using namespace std;
 
@@ -57,8 +57,8 @@ int main(int argc, char * argv[])
   outfile_imu.open("kitti_imu_0926_0117.txt");
   outfile_imu << std::fixed << std::setprecision(10);
   
-  //for (unsigned int i = 2; i < files.size(); i++) {
-  for (unsigned int i = 2; i < 5; i++) { 
+  for (unsigned int i = 3; i < files.size(); i++) {
+  //for (unsigned int i = 3; i < 5; i++) { 
     // Fetch imu data
     std::ifstream infile_imu;
     std::string filename = dir + files[i];
@@ -70,6 +70,7 @@ int main(int argc, char * argv[])
     for (std::string s; iss >> s;)
       tokens.push_back(s);
     infile_imu.close();
+    
     Eigen::Vector3d linear_acceleration(std::stod(tokens[11]) / M_G,
       std::stod(tokens[12]) / M_G, std::stod(tokens[13]) / M_G);
     Eigen::Vector3d angular_velocity(std::stod(tokens[17]),
@@ -81,6 +82,15 @@ int main(int argc, char * argv[])
     double time = std::stoi(t_str.substr(0, 2)) * 3600. + 
       std::stoi(t_str.substr(3, 2)) * 60. +
       std::stod(t_str.substr(6, 12)) * 1.;
+
+    // Output gps data to file
+    outfile_gps << std::stod(tokens[2]) << " " 
+      << std::stod(tokens[0]) << " " 
+      << std::stod(tokens[1]) << std::endl;
+
+    // Output orientation to file
+    outfile_imu << time << " " << std::stod(tokens[3]) * r_to_d << " " 
+      << std::stod(tokens[4]) * r_to_d << " " << std::stod(tokens[5]) * r_to_d << std::endl;
   }
 
   infile_time.close();
